@@ -57,7 +57,7 @@ void writetofile(char buf[1024])
 	fw = fopen("echo.log", "a");
 	time_t ti = time(NULL);
 	struct tm t = *localtime(&ti);
-	fprintf(fw,"\"%d-%d-%d %d:%d:%d\t%s\n", t.tm_year+1900, t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, buf);
+	fprintf(fw,"%d-%d-%d %d:%d:%d\t\"%s\n", t.tm_year+1900, t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, buf);
 	fclose(fw);
 }
 
