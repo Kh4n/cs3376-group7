@@ -1,16 +1,19 @@
 #include "server_functions.c"
+#define LOGPORT 9998
 
 int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response) {
 	int sockfd_log;
 	struct sockaddr_in log_addr;
-	setupLogServer(&sockfd_log, &log_addr, 9999);
+	setupLogServer(&sockfd_log, &log_addr, LOGPORT);
 	char loginfo[256] = {0};
-	strncpy(loginfo, buf, strlen(buf) - 1);
-	strcat(loginfo, " recieved from ");
-	strcat(loginfo, inet_ntoa(response.sin_addr));
 
 	printf("Received via TCP: %s", buf);
 	while (1) {
+		bzero(loginfo, 256);
+		strcpy(loginfo, "\"");
+		strncpy(loginfo, buf, strlen(buf) - 1);
+		strcat(loginfo, "\" recieved from ");
+		strcat(loginfo, inet_ntoa(response.sin_addr));
 		printf("Sending message back and logging...\n");
 		if (sendto(sockfd_log, loginfo, strlen(loginfo), 0, (struct sockaddr*)&log_addr, sizeof(struct sockaddr_in)) < 0)
 			error("ERROR sendto");
@@ -31,16 +34,18 @@ int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response) {
 int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response) {
 	int sockfd_log;
 	struct sockaddr_in log_addr;
-	setupLogServer(&sockfd_log, &log_addr, 9999);
+	setupLogServer(&sockfd_log, &log_addr, LOGPORT);
 
 	char loginfo[256] = {0};
-	strncpy(loginfo, buf, strlen(buf) - 1);
-	strcat(loginfo, " recieved from ");
-	strcat(loginfo, inet_ntoa(response.sin_addr));
 	socklen_t clilen = sizeof(struct sockaddr_in);
 
 	printf("Received via UDP: %s", buf);
 	while (1) {
+		bzero(loginfo, 256);
+		strcpy(loginfo, "\"");
+		strncpy(loginfo, buf, strlen(buf) - 1);
+		strcat(loginfo, "\" recieved from ");
+		strcat(loginfo, inet_ntoa(response.sin_addr));
 		printf("Sending message back and logging...\n");
 		if (sendto(sockfd_log, loginfo, strlen(loginfo), 0, (struct sockaddr*)&log_addr, clilen) < 0)
 			error("ERROR sendto");
@@ -67,7 +72,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	if (fork() == 0)
-		startServer(9999, echoResult_tcp, log);
+		startServer(LOGPORT, echoResult_tcp, log);
 	else if (fork() == 0)
 		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp);
 	else if (fork() == 0)
