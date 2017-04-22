@@ -1,4 +1,5 @@
 #include "server_functions.c"
+#include "log_s.c"
 #define LOGPORT 9998
 
 int echoResult_tcp(char buf[256], int sockfd, struct sockaddr_in response) {
@@ -60,11 +61,6 @@ int echoResult_udp(char buf[256], int sockfd, struct sockaddr_in response) {
 	return 0;
 }
 
-int log(char buf[256], int sockfd, struct sockaddr_in server) {
-	printf("WE LOGGGED %s\n", buf);
-	return 0;
-}
-
 int main(int argc, char *argv[])
 {
 	if (argc != 4) {
@@ -72,7 +68,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	if (fork() == 0)
-		startServer(LOGPORT, echoResult_tcp, log);
+		startLogServer(LOGPORT);
 	else if (fork() == 0)
 		startServer(atoi(argv[1]), echoResult_tcp, echoResult_udp);
 	else if (fork() == 0)
